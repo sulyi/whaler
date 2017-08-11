@@ -26,7 +26,7 @@ WHALER
     ~~   ~~~~~    ~~~~~    ~~~~~     ~~~~~~~ ~ ~~~~ ~~    
     ~ ~~~~~~ ~~~~~~   ~~  ~~~    ~~~~     ~~~   ~~~~ ~    
 
-The game aims to simulate the life on a sailing whaler
+The game aims to simulate the life on a whaler sailing
 ship. It aims to give a faithful image of the skills, 
 hardships and determination of those who mastered the 
 whaling trade, while picturing the brutality of this near
@@ -34,14 +34,14 @@ barbaric practice and tell the tail of the industrial
 revolution from the viewport of a man on a ship's deck at
 sea.
 
-The plot is driven by a very simple story of a seaman, who
-start out as a boy entering into service and follows his
-adventures at see as he (player) climbs the ranks of a 
-ship and masters seamanship. The camera perspective is 
-player centered instead of the ship, first-pension or
+The plot is driven by a very simple story of a seaman 
+(player), who starts out as a boy entering into service 
+and follows his adventures at see as he climbs the ranks
+of a ship and masters seamanship. The camera perspective
+is player centered instead of the ship, first-pension or
 chase cam or both with the ability to switch between them.
 Including a birds eye perspective (with literal seagull or
-albatross) solely for aesthetics as an extra feature.
+albatross) solely for aesthetics as an extra feature. 
 
 To achieve the goal the following mechanics and systems
 are used:
@@ -109,8 +109,8 @@ location time of the year and day.
 ### Weather System
 
 Local weather is subject to location and time of the year.
-Global weather is simulated to some extent in order to be
-able to sail around a storm.
+Global weather is simulated to some extent e.g. ability
+to sail around a storm.
 
 ### Migration System
 
@@ -122,8 +122,8 @@ time of the year and whaling intensity.
 Character Interaction System
 ----------------------------
 
-The player(s) and NPCs are collectively referred as
-character, therefore the interaction between them can
+The player and NPCs are all collectively considered
+characters, therefore the interaction between them can
 mean various things. Nevertheless it's fairly homogeneous
 system. The control of the ship is tightly linked to 
 character interactions, since it's done by issuing orders
@@ -131,29 +131,29 @@ to subordinates. That is done through the main HUD of the
 GUI, and similarly it can be used to give advise for
 superiors in rank when asked or on own initiative.
 These actions among others are valuated by the respect
-mechanics. The level of respect as character has effects
-the rank they cen fill in the crew, mainly because other
-characters having higher respect, but lower rank might
-challenge to take the rank. Player has access to perform
-any task or issue any order, that the ranks below his
-current one could.
+mechanics. The level of respect a character has effects
+the rank in the crew they can fill, mainly because other
+characters having higher respect then their superior can
+challenge them to take their rank. Player has access to
+perform any task or issue any order below his current
+rank.
 
 ### Dialog System
 
 Any interaction may result a response, in these cases
 multiple variants are available and the game chooses
 randomly and suppresses the chosen respond's probability
-in subsequent choices (e.g. through randomised list skip).
-In some interaction a dialog graph might be used.
+in subsequent choices (e.g. by randomly skipping in a
+list). In some interaction a dialog graph might be used.
 
 ### Respect (experience) Mechanics
 
 Assessing a situation either by carrying out a given order
 or acting on ones own initiative is valuated by the game
-and results change in the respect of the character,
-success and acting near optimally raises a character's
-respect value, failing a task or performing badly results
-loosing respect.
+and results a change in the respect value of the
+character, success and acting near optimally raises the
+character's respect, failing a task or performing badly
+results loosing respect.
 
 Charismatic interaction is a special kind of interaction.
 It consist of some kind of fast paste mini game like 
@@ -165,23 +165,23 @@ subordinate fails carrying out an order that would cause
 a lose for the player also, but scolding him would reflect
 that change to the subordinate.
 
-The respect of NPCs of their ow effects the their
-performance. To be in align with the player's respect
-changes NPCs have two non-changing attributes: skill and
-charisma. The skill attribute is a multiplier that's
-applied to the NPC's respect, therefore modifying his
-effectiveness and the same time controls the likely 
-progress of the character through this. The charisma
-attribute does the same for charismatic interactions of
-the NPC.
+The respect of NPCs effects the their performance. To be 
+in align with the player's respect changes NPCs have two
+non-changing attributes: skill and charisma. The skill
+attribute is a multiplier that's applied to the NPC's
+respect, therefore modifying his effectiveness and the
+same time controls the likely progress of the character.
+The charisma attribute does the same for charismatic
+interactions of the NPC.
 
 ### AI System
 
 The AI system enables the NPC's to perform their tasks.
 It can carry out orders and issue the correct orders for
-a given situation. Meanwhile is scalable by the NPC
+a given situation. Meanwhile it is scalable by the NPC
 attributes and respect value. However it does not attempt
-to find the optimal actions, those are hard-coded.
+to find the optimal actions, those are hard-coded. It can
+be viewed as an expert system for playing the game.
 
 
 GUI
