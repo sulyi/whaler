@@ -1,0 +1,33 @@
+<Comment> {
+  "egg-texture-cards -o models/button.egg -p 240,240 models/button.png"
+}
+<Texture> button {
+  "models/button.png"
+}
+<Group> {
+  <VertexPool> vpool {
+    <Vertex> 0 {
+      -0.208333 0.0520833 0
+      <UV> { 0 1 }
+    }
+    <Vertex> 1 {
+      -0.208333 -0.0520833 0
+      <UV> { 0 0 }
+    }
+    <Vertex> 2 {
+      0.208333 -0.0520833 0
+      <UV> { 1 0 }
+    }
+    <Vertex> 3 {
+      0.208333 0.0520833 0
+      <UV> { 1 1 }
+    }
+  }
+  <Group> button {
+    <Polygon> {
+      <RGBA> { 1 1 1 1 }
+      <TRef> { button }
+      <VertexRef> { 0 1 2 3 <Ref> { vpool } }
+    }
+  }
+}
