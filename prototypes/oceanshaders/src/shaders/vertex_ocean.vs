@@ -39,9 +39,9 @@ uniform vec4 gridRatio;
 // Output to fragment shader
 out vec4 texcoord0;
 out vec4 eyeVector;
-out vec3 binormalVector;
-out vec3 tangentVector;
-out vec3 normalVector;
+out vec3 binormal;
+out vec3 tangent;
+out vec3 normal;
 out vec4 bumpCoord01;
 out vec4 bumpCoord23;
 out float z;
@@ -61,7 +61,7 @@ void main() {
 	wave[1].dir = speed.zw;
 
     vec4 position = p3d_Vertex;
-    
+
     // applying texture deformation
     vec4 simulationSample = texture(vtftex, p3d_MultiTexCoord4);
 	position.z = (simulationSample.x - 0.5) * gridRatio.w;
@@ -100,12 +100,12 @@ void main() {
 	}
 	
 	position.xyz += displacement;
-	z = displacement.z / (2.0 * 1.75 * waveInfo.y) + 0.5;
+	z = position.z / (2.0 * 1.75 * waveInfo.y + 0.2) + 0.5;
 
 	float BumpScale = waveInfo.z;
-	binormalVector.xyz = BumpScale * normalize(vec3(cc.x, cc.z, -dd.y)); // Binormal
-	tangentVector.xyz = BumpScale * normalize(vec3(cc.z, cc.y, -dd.x)); // Tangent
-	normalVector.xyz = normalize(dd); // Normal
+	binormal.xyz = BumpScale * normalize(vec3(cc.x, cc.z, -dd.y)); // Binormal
+	tangent.xyz = BumpScale * normalize(vec3(cc.z, cc.y, -dd.x)); // Tangent
+	normal.xyz = normalize(dd); // Normal
 
     vec2 bumpSpeed = param2.xy;
 	vec2 textureScale = param2.zw;

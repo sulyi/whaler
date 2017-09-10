@@ -24,15 +24,15 @@ uniform int pass;
 // Input from vertex shader
 in vec4 texcoord0;
 in vec4 eyeVector;
-in vec3 binormalVector;
-in vec3 tangentVector;
-in vec3 normalVector;
+in vec3 binormal;
+in vec3 tangent;
+in vec3 normal;
 in vec4 bumpCoord01;
 in vec4 bumpCoord23;
 in float z;
 
 out vec4 colour;
-out vec4 height;
+out float height;
 
 void main() {
     vec4 t0 = texture(p3d_Texture1, bumpCoord01.xy) * 2.0 - 1.0;
@@ -41,9 +41,9 @@ void main() {
     vec3 N = t0.xyz + t1.xyz + t2.xyz;
 
     mat3 m; // tangent to world matrix
-    m[0] = binormalVector;
-    m[1] = tangentVector;
-    m[2] = normalVector;
+    m[0] = binormal;
+    m[1] = tangent;
+    m[2] = normal;
 
     N = normalize(N * m);
     vec3 E = normalize(eyeVector.xyz);
@@ -79,7 +79,6 @@ void main() {
     reflection = mix(waterColor,  reflection * reflectionColor, fresnel) * reflectionAmount;
 
     colour = waterColor + reflection;
-    // colour = waterColor + reflection;
 
     /*	try clipping */
     float edge = pow(bumpCoord23.z - 0.5, 2.0) + pow(bumpCoord23.w - 0.5, 2.0);
@@ -89,6 +88,6 @@ void main() {
         else
             colour.a = (0.25 - edge) / 0.03;
     }
+    height = z;
 
-    height = vec4(z, 0.0, 0.0, 1.0);
 }

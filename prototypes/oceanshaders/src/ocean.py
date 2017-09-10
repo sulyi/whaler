@@ -1,5 +1,6 @@
 import random
 
+import copy
 from direct.interval.LerpInterval import LerpTexOffsetInterval
 from panda3d.core import (
     Camera, CardMaker, CullFaceAttrib, Filename, FrameBufferProperties, GraphicsOutput, GraphicsPipe, LPlane, LPoint2,
@@ -128,16 +129,18 @@ class OceanShaderHelper(TextureShaderHelper):
 
         self._grid_ratio = LVector4(10, 10, 15, 5)
 
+        alt_render = NodePath('altRender')
+        self._clone = NodePath(copy.copy(self.target.node()))
+        self._clone.reparent_to(alt_render)
+
         # Heightmap buffer and camera
         winprops = WindowProperties.size(self._size, self._size)
         props = FrameBufferProperties()
-        props.set_rgb_color(1)
-        props.set_alpha_bits(1)
-        props.set_depth_bits(1)
         props.set_aux_rgba(1)
 
         wave_buffer = base.graphicsEngine.make_output(
-            base.pipe, "innerWaveBuffer", -1, props, winprops, GraphicsPipe.BFRefuseWindow, base.win.get_gsg(), base.win)
+            base.pipe, "innerWaveBuffer", -1, props, winprops,
+            GraphicsPipe.BFRefuseWindow, base.win.get_gsg(), base.win)
         wave_buffer.set_clear_color(LVector4(0.5, 0.5, 0.5, 0))
 
         quad_cam_node = Camera('wave-heightmap-quad-cam')
@@ -147,14 +150,14 @@ class OceanShaderHelper(TextureShaderHelper):
         lens.set_film_offset(0, 0)
         lens.set_near_far(-1000, 1000)
         quad_cam_node.set_lens(lens)
-        quad_cam_np = self.target.attach_new_node(quad_cam_node)
+        quad_cam_np = self._clone.attach_new_node(quad_cam_node)
 
         wave_buffer.get_display_region(0).set_camera(quad_cam_np)
         wave_buffer.get_display_region(0).set_active(1)
 
         self._wave_tex = Texture()
-        wave_buffer.add_render_texture(self._wave_tex, GraphicsOutput.RTMBindOrCopy, GraphicsOutput.RTP_aux_rgba_0)
-        self._heightmap = PNMImage(width, height)
+        wave_buffer.add_render_texture(self._wave_tex, GraphicsOutput.RTM_copy_ram, GraphicsOutput.RTP_aux_rgba_0)
+        self._heightmap = PNMImage(self._size, self._size)
 
         self.target.set_transparency(TransparencyAttrib.MAlpha)
 
@@ -166,7 +169,7 @@ class OceanShaderHelper(TextureShaderHelper):
             plane_node = PlaneNode('waterPlane')
             plane_node.set_plane(self._reflection_plane)
             # Buffer and reflection camera
-            reflection_buffer = base.win.make_texture_buffer('waterBuffer', 512, 512)
+            reflection_buffer = base.win.make_texture_buffer('waterBuffer', self._size, self._size)
             reflection_buffer.set_clear_color(LVector4(0, 0, 0, 1))
 
             cfa = CullFaceAttrib.make_reverse()
@@ -475,8 +478,12 @@ class OceanShaderHelper(TextureShaderHelper):
         self._grid_ratio = value
         self.set_shader_input('gridRatio', self._grid_ratio)
 
-    def update(self):
-        pass
+    def set_shader_input(self, name, *args):
+        super(OceanShaderHelper, self).set_shader_input(name, *args)
+        self._clone.set_shader_input(name, *args)
+
+    def update(self, time):
+        self._clone.set_shader_input('time', time)
         # self._reflection_plane.set_w(0.1 - self.target.get_z() - self.get_height(0, 0))
 
     def set_skybox(self, cubemap):
@@ -491,12 +498,13 @@ class OceanShaderHelper(TextureShaderHelper):
             mf = self._reflection_plane.get_reflection_mat()
             self._reflection_cam_np.set_mat(mc * mf)
         self.target.set_shader_input('eyePosition', LVector4(pos - self.target.get_pos(), 0))
+        self._clone.set_shader_input('eyePosition', LVector4(pos - self.target.get_pos(), 0))
 
     def get_height(self, x, y):
-        self.base.graphicsEngine.extract_texture_data(self._wave_tex, self.base.win.get_gsg())
         self._wave_tex.store(self._heightmap)
-        f = self._heightmap.get_pixel(*self.get_texture_pos(x, y)).get_red() / 255.0 - 0.5
-        return f * 2.0 * 1.75 * self._wave_amp
+        self._heightmap.flip(False, True, False)
+        f = self._heightmap.get_pixel(*self.get_texture_pos(x, y))
+        return (f.get_red() / 255.0 - 0.5) * (2.0 * 1.75 * self._wave_amp + 0.2)
 
 
 class WaterShaderHelper(TextureShaderHelper):
@@ -518,8 +526,7 @@ class WaterShaderHelper(TextureShaderHelper):
 
         self.is_texture_changed = False
 
-        # FIXME: shader paints out side of buffer, this is only a quick patch
-        surface_buffer = base.win.make_texture_buffer('surface', 2 * self._size, 2 * self._size)
+        surface_buffer = base.win.make_texture_buffer('surface', self._size, self._size, Texture(), True)
         surface_buffer.set_clear_color(LVector4(0.5, 0.5, 0.5, 0))
         surface_buffer.set_sort(-1)
 
@@ -589,8 +596,6 @@ class WaterShaderHelper(TextureShaderHelper):
                 self._dampening))
 
     def update(self):
-        self.base.graphicsEngine.extract_texture_data(self._temp_tex, self.base.win.get_gsg())
-
         self._tex1.load(self._screen_image)
         self._temp_tex.store(self._screen_image)
         if self._screen_image_new is not None and self.is_texture_changed:
@@ -608,14 +613,11 @@ class WaterShaderHelper(TextureShaderHelper):
     def push_water(self, x1, y1, r, v):
         if self._screen_image_new is None:
             self._screen_image_new = PNMImage(self._size, self._size)
-            self.base.graphicsEngine.extract_texture_data(self._temp_tex, self.base.win.get_gsg())
             self._temp_tex.store(self._screen_image_new)
-        x1 *= 2
-        y1 *= 2
         frx = max(0, x1 - r)
-        tox = min(2 * self._size, x1 + r + 1)
+        tox = min(self._size, x1 + r + 1)
         fry = max(0, y1 - r)
-        toy = min(2 * self._size, y1 + r + 1)
+        toy = min(self._size, y1 + r + 1)
         for x in range(frx, tox):
             for y in range(fry, toy):
                 self._screen_image_new.set_red(x, y, v)
@@ -669,7 +671,7 @@ class WaterNodeHelper(object):
                 self.water_shader_hlp.push_water(x1, y1, r, v)
                 self._next_rain_time = time + random.random() * 0.5 + 0.15
 
-        self.ocean_shader_hlp.update()
+        self.ocean_shader_hlp.update(time)
         self.water_shader_hlp.update()
 
     def hide(self):
